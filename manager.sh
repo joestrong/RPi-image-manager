@@ -43,6 +43,7 @@ Images['RISCOS']="https://www.riscosopen.org/zipfiles/platform/raspberry-pi/risc
 Images['RetroPi']="https://github.com/RetroPie/RetroPie-Setup/releases/download/3.4/retropie-v3.4-rpi1.img.gz"
 Images['RetroPi2']="https://github.com/RetroPie/RetroPie-Setup/releases/download/3.4/retropie-v3.4-rpi2.img.gz"
 Images['MATE']="https://ubuntu-mate.r.worldssl.net/raspberry-pi/ubuntu-mate-15.10.1-desktop-armhf-raspberry-pi-2.img.xz"
+Images['Windows-10-IOT-Core']="http://go.microsoft.com/fwlink/?LinkId=691711"
 
 
 declare -A ImagesSHA1
@@ -61,6 +62,7 @@ ImagesSHA1['RISCOS']="9c28ce57a23692cd70e90cfe9fa24e2014501a05"
 #ImagesSHA1['RetroPi']=""
 #ImagesSHA1['RetroPi2']=""
 ImagesSHA1['MATE']="9964890fc6be2ac35c2cef3efcfde0687dab43a4"
+#ImagesSHA1['Windows-10-IOT-Core']=""
 
 # If the list flag has been raised, list the images
 if [ $IMAGE_LIST = true ]; then
@@ -253,6 +255,20 @@ if [[ $IMAGE_TYPE_DATA =~ "boot sector" ]]; then
 	IMAGE_ARCHIVE_TOOL="NONE"
 fi
 
+if [[ $IMAGE_TYPE_DATA =~ "J_ARPI_A32FREO_EN-US_DV5" ]]; then
+
+	#Set the archive type
+	IMAGE_ARCHIVE_TYPE="ISO"
+
+	#Set the tool used to decompress this type of archive
+	IMAGE_ARCHIVE_TOOL="7z"
+
+	#Determine the decompressed size of the archive
+	REGEX="[ ]+[0-9]+[ ]+([0-9]+)"
+	[[ `7z -l "$IMAGE_FILE"` =~ $REGEX ]]
+	IMAGE_ARCHIVE_SIZE="${BASH_REMATCH[1]}"
+fi
+
 # Check if were able to determine what type of file the image is
 if [[ "$IMAGE_ARCHIVE_TYPE" = "" ]]; then
 	echo -e "$COLOUR_PUR$IMAGE_NAME:$COLOUR_RST Couldn't determine the file type of the image: '$IMAGE_TYPE_DATA'"
@@ -263,6 +279,9 @@ fi
 if [ "$IMAGE_ARCHIVE_TYPE" = "NONE" ]; then
 	# No compression, write straight to disk
 	pv -pabeWcN "Writing" "$IMAGE_FILE" | dd bs=4M of="$DEVICE_PATH" conv=fdatasync
+elif [ "$IMAGE_ARCHIVE_TYPE" = "ISO" ]; then
+	echo -e "$COLOUR_PUR$IMAGE_NAME:$COLOUR_RST The image is Windows, extracting ISO & MSI to IMG"
+        7z x -so $IMAGE_FILE | 7z x -si
 else
 	echo -e "$COLOUR_PUR$IMAGE_NAME:$COLOUR_RST The image is compressed"
 

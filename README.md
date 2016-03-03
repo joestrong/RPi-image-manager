@@ -42,6 +42,7 @@ The following images can be installed just by using their names:
 - Pidora
 - RISC OS
 - Retro Pi (For RPi 1 & 2)
+- Windows 10 IOT Core
 
 ## Dependencies
 
@@ -52,3 +53,10 @@ There is only a single package required which is non-standard; pv. It's easily i
     
     # RHEL / CentOS
     yum install pv
+
+### Windows
+
+Windows has some extra dependancies
+
+    # Install 7zip
+    sudo apt-get install p7zip-full
